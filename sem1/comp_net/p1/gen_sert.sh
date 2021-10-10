@@ -1,10 +1,10 @@
 #!/bin/sh
 
 fio='shushuevai'
-group='msp99'
+group='msp21'
 email='statiz.arm@gmail.com'
 
-rm -f $fio-$group*
+rm -f $fio-*
 
 # Корневой сертификат
 # ключ
@@ -68,7 +68,7 @@ openssl req \
     -config openssl-basic.conf -new -key $fio-$group-basic.key -out \
     $fio-$group-basic.crt -passin pass:
 
-openssl x509 -req -days 365 \
+openssl x509 -req -days 90 \
     -extensions v3_ca -extfile openssl-basic.conf \
     -CA $fio-$group-intr.crt \
     -CAkey $fio-$group-intr.key \
