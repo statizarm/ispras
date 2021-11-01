@@ -12,6 +12,6 @@
 using literal_values_type = std::unordered_map<std::string, bool>;
 using cnf_repr_type = std::list<Clause>;
 
-bool dpll(cnf_repr_type);
+bool dpll(const cnf_repr_type &);
 
 #endif //YADPLL_INCLUDE_DPLL_H_

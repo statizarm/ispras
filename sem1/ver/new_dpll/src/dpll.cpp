@@ -6,6 +6,7 @@
 #include <queue>
 #include <algorithm>
 #include <unordered_set>
+#include <stack>
 
 #include "dpll.h"
 
@@ -13,38 +14,49 @@ using singleton_clauses_type = std::queue<Literal>;
 
 static cnf_repr_type &spread_one(cnf_repr_type &, singleton_clauses_type &, std::unordered_set<std::string> &);
 static bool has_empty(const cnf_repr_type &cnf_repr);
-static std::unordered_set<std::string> get_literals(cnf_repr_type &cnf_repr);
+static std::unordered_set<std::string> get_literals(const cnf_repr_type &cnf_repr);
 static cnf_repr_type set_lit_value(cnf_repr_type, const Literal &);
 
-bool dpll(cnf_repr_type cnf_repr) {
+bool dpll(const cnf_repr_type &cnf_repr) {
   singleton_clauses_type singleton_clauses;
+  std::stack<std::pair<cnf_repr_type, std::unordered_set<std::string>>> stack;
   auto literals = get_literals(cnf_repr);
 
-  for (auto &&cl : cnf_repr) {
-    if (cl.size() == 1) {
-      singleton_clauses.push(*cl.literals().begin());
-      break;
+  stack.emplace(cnf_repr, literals);
+
+  while (!stack.empty()) {
+    auto [repr, lits] = stack.top();
+    stack.pop();
+
+    for (auto &&cl : repr) {
+      if (cl.size() == 1) {
+        singleton_clauses.push(*cl.literals().begin());
+        break;
+      }
     }
+
+    spread_one(repr, singleton_clauses, lits);
+
+    if (repr.empty()) {
+      return true;
+    }
+
+    if (has_empty(repr)) {
+      continue;
+    }
+
+    auto lit = *lits.begin();
+
+    lits.erase(lits.begin());
+
+    auto left = set_lit_value(repr, Literal(lit, false));
+    auto right = set_lit_value(repr, Literal(lit, true));
+
+    stack.emplace(left, lits);
+    stack.emplace(right, lits);
   }
 
-  spread_one(cnf_repr, singleton_clauses, literals);
-
-  if (cnf_repr.empty()) {
-    return true;
-  }
-
-  if (has_empty(cnf_repr)) {
-    return false;
-  }
-
-  {
-    auto lit = *literals.begin();
-
-    auto left = set_lit_value(cnf_repr, Literal(lit, false));
-    auto right = set_lit_value(cnf_repr, Literal(lit, true));
-
-    return dpll(left) || dpll(right);
-  }
+  return false;
 }
 
 static cnf_repr_type &spread_one(
@@ -79,7 +91,7 @@ static bool has_empty(const cnf_repr_type &cnf_repr) {
   });
 }
 
-static std::unordered_set<std::string> get_literals(cnf_repr_type &cnf_repr) {
+static std::unordered_set<std::string> get_literals(const cnf_repr_type &cnf_repr) {
   // TODO: add treap implementation
   std::unordered_set<std::string> literals;
 
