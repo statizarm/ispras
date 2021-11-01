@@ -1,21 +1,30 @@
 #include <iostream>
 #include <vector>
+#include <fstream>
 #include "cnf.h"
 
-int main() {
-  std::cout << "a || b && b || ~a" << std::endl;
-
-  std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a"), Literal("b")},
-      std::vector<Literal>{Literal("b"), Literal("a", true)},
-      };
-  std::vector<Clause> clauses;
-  for (auto literals : clause_literals) {
-    clauses.emplace_back(literals.begin(), literals.end());
+int main(int argc, char *argv[]) {
+  if (argc == 1) {
+    std::cerr << "Provide path to .cnf file" << std::endl;
+    exit(-1);
   }
 
-  CNF cnf(clauses.begin(), clauses.end());
+  const char* path = argv[1];
 
-  std::cout << "Try solve: " << cnf.solve() << std::endl;
+  std::ifstream in(path);
+
+  if (!in.is_open()) {
+    std::cerr << "File not found: " << path << std::endl;
+    exit(-1);
+  }
+
+  auto cnf = CNF::load_cnf(in);
+
+  if (cnf->solve()) {
+    std::cout << "SAT" << std::endl;
+  } else {
+    std::cout << "UNSAT" << std::endl;
+  }
+
   return 0;
 }

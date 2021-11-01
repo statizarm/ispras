@@ -5,12 +5,12 @@
 #ifndef YADPLL_INCLUDE_CNF_H_
 #define YADPLL_INCLUDE_CNF_H_
 
-#import <string>
-#import <unordered_map>
-#import <memory>
-#import <istream>
+#include <string>
+#include <unordered_map>
+#include <memory>
+#include <istream>
 
-#import "clause.h"
+#include "clause.h"
 
 class CNF {
  public:

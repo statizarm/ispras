@@ -228,6 +228,62 @@ TEST(solveTest, solveAllOpposedTest) {
   ASSERT_EQ(cnf.solve(), true);
 }
 
+TEST(solveTest, solveExpressionWithDuplicatesTest) {
+
+  std::vector<Literal> clause_literals[] = {
+      std::vector<Literal>{Literal("a"), Literal("a"), Literal("b")},
+      std::vector<Literal>{Literal("b", true), Literal("b", true)},
+      };
+
+  std::vector<Clause> clauses;
+  for (auto literals : clause_literals) {
+    clauses.emplace_back(literals.begin(), literals.end());
+  }
+
+  CNF cnf(clauses.begin(), clauses.end());
+
+  ASSERT_EQ(cnf.solve(), true);
+}
+
+TEST(buildCNFTest, buildFromStringWithTest) {
+  std::string source = "c A sample .cnf file.\n"
+                       "p cnf 3 2\n"
+                       "1 -3 0\n"
+                       "2 3 -1 0\n";
+
+  std::istringstream in(source);
+
+  auto cnf = CNF::load_cnf(in);
+
+  ASSERT_EQ(cnf->solve(), true);
+}
+
+TEST(buildCNFTest, buildAndSolveWrongExpressionTest) {
+  std::string source = "c A sample .cnf file.\n"
+                       "p cnf 1 2\n"
+                       "1 0\n"
+                       "-1 0\n";
+
+  std::istringstream in(source);
+
+  auto cnf = CNF::load_cnf(in);
+
+  ASSERT_EQ(cnf->solve(), false);
+}
+
+TEST(buildCNFTest, buildAndSolveWrongExpressionInLogFromatTest) {
+  std::string source = "c A sample .cnf file.\n"
+                       "p cnf 1 2\n"
+                       "1 0\n"
+                       "-1 0\n"
+                       "hmm\n";
+
+  std::istringstream in(source);
+
+  auto cnf = CNF::load_cnf(in);
+  ASSERT_EQ(cnf->solve(), false);
+}
+
 int main(int argc, char *argv[]) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

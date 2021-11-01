@@ -5,8 +5,8 @@
 #ifndef DPLL_INCLUDE_CLAUSE_H_
 #define DPLL_INCLUDE_CLAUSE_H_
 
-#import <string>
-#import <set>
+#include <string>
+#include <set>
 
 class Literal {
  public:
