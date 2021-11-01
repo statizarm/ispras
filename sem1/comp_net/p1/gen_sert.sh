@@ -153,9 +153,108 @@ openssl ca -config openssl-intr.conf \
            -passin pass:shushuevai
 
 # Генерируем цепочку сертификатов
-cat $fio-$group-ca.crt $fio-$group-intr.crt > $fio-$group-chain.crt
+cat $fio-$group-intr.crt $fio-$group-ca.crt > $fio-$group-chain.crt
 
 # Собираем архив
 zip $fio-$group-p1_2.zip $fio-$group-crl-valid.*  $fio-$group-crl-revoked.* \
     $fio-$group.crl $fio-$group-chain.crt
 
+# Сертификат OCSP
+# Ключ
+openssl genrsa -out $fio-$group-ocsp-resp.key -aes256 -passout pass:$fio 4096
+
+# Сертификат
+C='RU'
+ST='Moscow'
+L='Moscow'
+O=$fio
+OU="${fio} P3"
+CN="${fio} OCSP Responder"
+printf "${C}\n${ST}\n${L}\n${O}\n${OU}\n${CN}\n${email}\n\n\n" | \
+openssl req \
+    -config openssl-ocsp-resp.conf -new -key $fio-$group-ocsp-resp.key -out \
+    $fio-$group-ocsp-resp.crt -passin pass:$fio
+
+openssl x509 -req -days 365 \
+    -extensions v3_ca -extfile openssl-ocsp-resp.conf \
+    -CA $fio-$group-intr.crt \
+    -CAkey $fio-$group-intr.key \
+    -CAcreateserial \
+    -CAserial serial \
+    -in $fio-$group-ocsp-resp.crt -out $fio-$group-ocsp-resp.crt \
+    -passin pass:$fio
+
+# Цепочка
+cat $fio-$group-ocsp-resp.crt $fio-$group-chain.crt > $fio-$group-chain.crt.new
+mv $fio-$group-chain.crt.new $fio-$group-chain.crt
+
+# OCSP Валидный сертификат
+# Ключ
+openssl genrsa -out $fio-$group-ocsp-valid.key -passout pass: 2048
+
+# Сертификат
+C='RU'
+ST='Moscow'
+L='Moscow'
+O=$fio
+OU="${fio} P3"
+CN="${fio} OCSP Valid"
+printf "${C}\n${ST}\n${L}\n${O}\n${OU}\n${CN}\n${email}\n\n\n" | \
+openssl req \
+    -config openssl-ocsp-valid.conf -new -key $fio-$group-ocsp-valid.key -out \
+    $fio-$group-ocsp-valid.crt -passin pass:
+
+openssl x509 -req -days 90 \
+    -extensions v3_ca -extfile openssl-ocsp-valid.conf \
+    -CA $fio-$group-intr.crt \
+    -CAkey $fio-$group-intr.key \
+    -CAcreateserial \
+    -CAserial serial \
+    -in $fio-$group-ocsp-valid.crt -out $fio-$group-ocsp-valid.crt \
+    -passin pass:$fio
+
+# Валидируем сертификат
+openssl ca -config openssl-intr.conf \
+           -keyfile shushuevai-msp21-intr.key \
+           -cert shushuevai-msp21-intr.crt \
+           -valid shushuevai-msp21-ocsp-valid.crt \
+           -passin pass:shushuevai
+
+# OCSP Отозванный сертификат
+# Ключ
+openssl genrsa -out $fio-$group-ocsp-revoked.key -passout pass: 2048
+
+# Сертификат
+C='RU'
+ST='Moscow'
+L='Moscow'
+O=$fio
+OU="${fio} P3"
+CN="${fio} OCSP Revoked"
+printf "${C}\n${ST}\n${L}\n${O}\n${OU}\n${CN}\n${email}\n\n\n" | \
+openssl req \
+    -config openssl-ocsp-revoked.conf -new -key $fio-$group-ocsp-revoked.key -out \
+    $fio-$group-ocsp-revoked.crt -passin pass:
+
+openssl x509 -req -days 90 \
+    -extensions v3_ca -extfile openssl-ocsp-revoked.conf \
+    -CA $fio-$group-intr.crt \
+    -CAkey $fio-$group-intr.key \
+    -CAcreateserial \
+    -CAserial serial \
+    -in $fio-$group-ocsp-revoked.crt -out $fio-$group-ocsp-revoked.crt \
+    -passin pass:$fio
+
+# Отзываем сертификат
+openssl ca -config openssl-intr.conf \
+           -keyfile shushuevai-msp21-intr.key \
+           -cert shushuevai-msp21-intr.crt \
+           -revoke shushuevai-msp21-ocsp-revoked.crt \
+           -passin pass:shushuevai
+
+# Собираем архив
+zip $fio-$group-p1_3.zip $fio-$group-ocsp-valid.*  $fio-$group-ocsp-revoked.* \
+    $fio-$group-ocsp-resp.* $fio-$group-chain.crt
+
+# Поднимаем ocsp сервер
+# openssl ocsp -port 2560 -index cadir/index.txt -CA shushuevai-msp21-chain.crt -rkey shushuevai-msp21-ocsp-resp.key -rsigner shushuevai-msp21-ocsp-resp.crt -text -out ocsp.log
