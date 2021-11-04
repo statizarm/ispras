@@ -5,81 +5,77 @@
 #include <clause.h>
 #include <queue>
 #include <algorithm>
-#include <unordered_set>
 #include <stack>
 
 #include "dpll.h"
+#include "literal_queue.h"
 
-using singleton_clauses_type = std::queue<Literal>;
-
-static cnf_repr_type &spread_one(cnf_repr_type &, singleton_clauses_type &, std::unordered_set<std::string> &);
+static cnf_repr_type &spread_one(cnf_repr_type &, LiteralQueue &);
 static bool has_empty(const cnf_repr_type &cnf_repr);
-static std::unordered_set<std::string> get_literals(const cnf_repr_type &cnf_repr);
-static cnf_repr_type set_lit_value(cnf_repr_type, const Literal &);
+static LiteralQueue get_literal_queue(const cnf_repr_type &cnf_repr);
+static cnf_repr_type &set_lit_value(cnf_repr_type &, LiteralQueue &, bool opposed);
 
 bool dpll(const cnf_repr_type &cnf_repr) {
-  singleton_clauses_type singleton_clauses;
-  std::stack<std::pair<cnf_repr_type, std::unordered_set<std::string>>> stack;
-  auto literals = get_literals(cnf_repr);
+  std::stack<std::pair<cnf_repr_type, LiteralQueue>> stack;
 
-  stack.emplace(cnf_repr, literals);
+  stack.emplace(cnf_repr, get_literal_queue(cnf_repr));
 
   while (!stack.empty()) {
-    auto [repr, lits] = stack.top();
-    stack.pop();
+    auto &[repr, queue] = stack.top();
 
-    for (auto &&cl : repr) {
-      if (cl.size() == 1) {
-        singleton_clauses.push(*cl.literals().begin());
-        break;
-      }
-    }
-
-    spread_one(repr, singleton_clauses, lits);
+    spread_one(repr, queue);
 
     if (repr.empty()) {
       return true;
     }
 
     if (has_empty(repr)) {
+      stack.pop();
       continue;
     }
 
-    auto lit = *lits.begin();
+    // Memory usage optimization
+    stack.emplace(repr, queue);
 
-    lits.erase(lits.begin());
-
-    auto left = set_lit_value(repr, Literal(lit, false));
-    auto right = set_lit_value(repr, Literal(lit, true));
-
-    stack.emplace(left, lits);
-    stack.emplace(right, lits);
+    if (queue.is_max_opposed()) {
+      set_lit_value(stack.top().first, stack.top().second, true);
+      set_lit_value(repr, queue, false);
+    } else {
+      set_lit_value(stack.top().first, stack.top().second, false);
+      set_lit_value(repr, queue, true);
+    }
   }
 
   return false;
 }
 
-static cnf_repr_type &spread_one(
-    cnf_repr_type &cnf_repr,
-    singleton_clauses_type &singleton_clauses,
-    std::unordered_set<std::string> &literals) {
-  while (!singleton_clauses.empty()) {
-    auto lit = singleton_clauses.front();
-    singleton_clauses.pop();
+static cnf_repr_type &spread_one(cnf_repr_type &cnf_repr, LiteralQueue &queue) {
+  bool has_singleton = false;
+  Literal single_literal(0);
+  for (auto &[_, cl] : cnf_repr) {
+    if (cl.size() == 1) {
+      has_singleton = true;
+      single_literal = cl.get_literal();
+      break;
+    }
+  }
 
-    for (auto it = cnf_repr.begin(); it != cnf_repr.end();) {
-      auto next_it = std::next(it);
+  while (has_singleton) {
+    has_singleton = false;
+    auto [lit, same, opp] = queue.pop_literal(single_literal);
 
-      if (it->contains(lit)) {
-        cnf_repr.erase(it);
-      } else if (it->spread_one(lit).size() == 1 && singleton_clauses.empty()) {
-        singleton_clauses.push(*it->literals().begin());
-      }
-
-      it = next_it;
+    for (auto &&name : same) {
+      cnf_repr.erase(name);
     }
 
-    literals.erase(lit.name());
+    for (auto &&name : opp) {
+      if (auto it = cnf_repr.find(name); it == cnf_repr.end()){
+        continue;
+      } else if (auto &cl = it->second.delete_opposed(lit); cl.size() == 1) {
+        has_singleton = true;
+        single_literal = cl.get_literal();
+      }
+    }
   }
 
   return cnf_repr;
@@ -87,33 +83,33 @@ static cnf_repr_type &spread_one(
 
 static bool has_empty(const cnf_repr_type &cnf_repr) {
   return std::any_of(cnf_repr.begin(), cnf_repr.end(), [](const cnf_repr_type::value_type &val) {
-    return val.size() == 0;
+    return val.second.size() == 0;
   });
 }
 
-static std::unordered_set<std::string> get_literals(const cnf_repr_type &cnf_repr) {
-  // TODO: add treap implementation
-  std::unordered_set<std::string> literals;
+static LiteralQueue get_literal_queue(const cnf_repr_type &cnf_repr) {
+  LiteralQueue queue;
 
-  for (auto &&cl: cnf_repr) {
+  for (auto &&[name, cl]: cnf_repr) {
     for (auto &&lit : cl.literals()) {
-      literals.insert(lit.name());
+      queue.push(lit, name);
     }
   }
 
-  return literals;
+  return queue;
 }
 
-static cnf_repr_type set_lit_value(cnf_repr_type cnf_repr, const Literal &lit) {
-  for (auto it = cnf_repr.begin(); it != cnf_repr.end();) {
-    auto next_it = std::next(it);
-    if (it->contains(lit)) {
-      cnf_repr.erase(it);
-    } else {
-      it->spread_one(lit);
-    }
+static cnf_repr_type &set_lit_value(cnf_repr_type &cnf_repr, LiteralQueue &queue, bool opposed) {
+  auto [lit, same, opp] = queue.pop_next_clauses(opposed);
 
-    it = next_it;
+  for (auto &&name : same) {
+    cnf_repr.erase(name);
+  }
+
+  for (auto &&name : opp) {
+    if (auto it = cnf_repr.find(name); it != cnf_repr.end()) {
+      it->second.delete_opposed(lit);
+    }
   }
 
   return cnf_repr;

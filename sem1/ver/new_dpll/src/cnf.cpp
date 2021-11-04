@@ -40,27 +40,19 @@ std::unique_ptr<CNF> CNF::load_cnf(std::istream &in) {
 }
 
 bool CNF::solve() const noexcept {
-  std::list<Clause> list;
-
-  for (auto &&[_, cl] : this->clauses_) {
-    list.push_back(cl);
-  }
-
-  return dpll(list);
+  return dpll(this->clauses_);
 }
 
 static std::vector<Literal> parse_clause_string(const std::string &str) {
   std::istringstream in(str);
   std::vector<Literal> literals;
   int lit_id;
-  std::string lit_name;
 
   while (in >> lit_id && lit_id != 0) {
-    lit_name = std::to_string(std::abs(lit_id));
     if (lit_id < 0) {
-      literals.emplace_back(lit_name, true);
+      literals.emplace_back(std::abs(lit_id), true);
     } else {
-      literals.emplace_back(lit_name, false);
+      literals.emplace_back(std::abs(lit_id), false);
     }
   }
 

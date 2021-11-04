@@ -8,8 +8,8 @@
 TEST(solveTest, solveCorrectExpressionTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a"), Literal("b")},
-      std::vector<Literal>{Literal("b"), Literal("a", true)}
+      std::vector<Literal>{Literal(1), Literal(2)},
+      std::vector<Literal>{Literal(2), Literal(1, true)}
   };
 
   std::vector<Clause> clauses;
@@ -25,7 +25,7 @@ TEST(solveTest, solveCorrectExpressionTest) {
 TEST(solveTest, solveCNFWithRepeatTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a"), Literal("a", true)}
+      std::vector<Literal>{Literal(1), Literal(1, true)}
   };
 
   std::vector<Clause> clauses;
@@ -41,9 +41,9 @@ TEST(solveTest, solveCNFWithRepeatTest) {
 TEST(solveTest, solveCNFWithPureLitTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a"), Literal("b")},
-      std::vector<Literal>{Literal("c"), Literal("b", false)},
-      std::vector<Literal>{Literal("c"), Literal("a", false)},
+      std::vector<Literal>{Literal(1), Literal(2)},
+      std::vector<Literal>{Literal(3), Literal(2, false)},
+      std::vector<Literal>{Literal(3), Literal(1, false)},
   };
 
   std::vector<Clause> clauses;
@@ -59,12 +59,12 @@ TEST(solveTest, solveCNFWithPureLitTest) {
 TEST(solveTest, solveCNFWithSingleLitEntryTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a")},
-      std::vector<Literal>{Literal("b")},
-      std::vector<Literal>{Literal("c")},
-      std::vector<Literal>{Literal("d")},
-      std::vector<Literal>{Literal("e")},
-      std::vector<Literal>{Literal("f")}
+      std::vector<Literal>{Literal(1)},
+      std::vector<Literal>{Literal(2)},
+      std::vector<Literal>{Literal(3)},
+      std::vector<Literal>{Literal(4)},
+      std::vector<Literal>{Literal(5)},
+      std::vector<Literal>{Literal(6)}
   };
 
   std::vector<Clause> clauses;
@@ -80,12 +80,12 @@ TEST(solveTest, solveCNFWithSingleLitEntryTest) {
 TEST(solveTest, solveCNFWithSingleLitTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a")},
-      std::vector<Literal>{Literal("a")},
-      std::vector<Literal>{Literal("a")},
-      std::vector<Literal>{Literal("a")},
-      std::vector<Literal>{Literal("a")},
-      std::vector<Literal>{Literal("a")}
+      std::vector<Literal>{Literal(1)},
+      std::vector<Literal>{Literal(1)},
+      std::vector<Literal>{Literal(1)},
+      std::vector<Literal>{Literal(1)},
+      std::vector<Literal>{Literal(1)},
+      std::vector<Literal>{Literal(1)}
   };
 
   std::vector<Clause> clauses;
@@ -101,12 +101,12 @@ TEST(solveTest, solveCNFWithSingleLitTest) {
 TEST(solveTest, solveCNFWithSingleOpposedLitTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a", true)},
-      std::vector<Literal>{Literal("a", true)},
-      std::vector<Literal>{Literal("a", true)},
-      std::vector<Literal>{Literal("a", true)},
-      std::vector<Literal>{Literal("a", true)},
-      std::vector<Literal>{Literal("a", true)}
+      std::vector<Literal>{Literal(1, true)},
+      std::vector<Literal>{Literal(1, true)},
+      std::vector<Literal>{Literal(1, true)},
+      std::vector<Literal>{Literal(1, true)},
+      std::vector<Literal>{Literal(1, true)},
+      std::vector<Literal>{Literal(1, true)}
   };
 
   std::vector<Clause> clauses;
@@ -146,8 +146,8 @@ TEST(solveTest, solveEmptyClausesTest) {
 TEST(solveTest, solveCorrectWithDoubleOpposedLitExpressionTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a"), Literal("b")},
-      std::vector<Literal>{Literal("b", true), Literal("a", true)}
+      std::vector<Literal>{Literal(1), Literal(2)},
+      std::vector<Literal>{Literal(2, true), Literal(1, true)}
   };
 
   std::vector<Clause> clauses;
@@ -163,9 +163,9 @@ TEST(solveTest, solveCorrectWithDoubleOpposedLitExpressionTest) {
 TEST(solveTest, solveWrongExpressionTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("b", true), Literal("a", true)},
-      std::vector<Literal>{Literal("b")},
-      std::vector<Literal>{Literal("b", true)}
+      std::vector<Literal>{Literal(2, true), Literal(1, true)},
+      std::vector<Literal>{Literal(2)},
+      std::vector<Literal>{Literal(2, true)}
   };
 
   std::vector<Clause> clauses;
@@ -181,7 +181,7 @@ TEST(solveTest, solveWrongExpressionTest) {
 TEST(solveTest, solveTrivialCorrectExpressionTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a")}
+      std::vector<Literal>{Literal(1)}
   };
 
   std::vector<Clause> clauses;
@@ -197,8 +197,8 @@ TEST(solveTest, solveTrivialCorrectExpressionTest) {
 TEST(solveTest, solveTrivialWrongExpressionTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a")},
-      std::vector<Literal>{Literal("a", true)}
+      std::vector<Literal>{Literal(1)},
+      std::vector<Literal>{Literal(1, true)}
   };
 
   std::vector<Clause> clauses;
@@ -214,8 +214,8 @@ TEST(solveTest, solveTrivialWrongExpressionTest) {
 TEST(solveTest, solveAllOpposedTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a", true), Literal("b", true)},
-      std::vector<Literal>{Literal("b", true), Literal("a", true)},
+      std::vector<Literal>{Literal(1, true), Literal(2, true)},
+      std::vector<Literal>{Literal(2, true), Literal(1, true)},
       };
 
   std::vector<Clause> clauses;
@@ -231,8 +231,8 @@ TEST(solveTest, solveAllOpposedTest) {
 TEST(solveTest, solveExpressionWithDuplicatesTest) {
 
   std::vector<Literal> clause_literals[] = {
-      std::vector<Literal>{Literal("a"), Literal("a"), Literal("b")},
-      std::vector<Literal>{Literal("b", true), Literal("b", true)},
+      std::vector<Literal>{Literal(1), Literal(1), Literal(2)},
+      std::vector<Literal>{Literal(1, true), Literal(2, true)},
       };
 
   std::vector<Clause> clauses;

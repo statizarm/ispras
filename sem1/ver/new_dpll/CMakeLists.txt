@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(yadpll)
 
 set(CMAKE_CXX_STANDARD 17)
-set(SOURCES include/clause.h src/clause.cpp include/cnf.h src/cnf.cpp src/dpll.cpp include/dpll.h)
+set(SOURCES include/clause.h src/clause.cpp include/cnf.h src/cnf.cpp src/dpll.cpp include/dpll.h include/literal_queue.h src/literal_queue.cpp)
 
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
@@ -27,6 +27,6 @@ target_include_directories(
 
 target_link_libraries(stress ${GTEST_LIBRARIES} gtest gtest_main)
 
-add_executable(yadpll main.cpp include/clause.h src/clause.cpp include/cnf.h src/cnf.cpp src/dpll.cpp include/dpll.h)
+add_executable(yadpll main.cpp ${SOURCES})
 
 target_include_directories(yadpll PRIVATE include/)
