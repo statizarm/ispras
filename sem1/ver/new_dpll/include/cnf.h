@@ -10,25 +10,30 @@
 #include <memory>
 #include <istream>
 
-#include "clause.h"
+#include "literal.h"
 
 class CNF {
  public:
   static std::unique_ptr<CNF> load_cnf(std::istream &in);
 
-  template<class It>
-  CNF(It begin, It end) : clauses_() {
-    std::string base_pref = "c";
+  CNF() : table_(nullptr) { }
+  CNF(LiteralClauses *table) : table_(table) { }
 
-    for (int c = 0; begin != end; ++begin, ++c) {
-      this->clauses_.insert({base_pref + std::to_string(c), *begin});
-    }
+  ~CNF() {
+    delete this->table_;
   }
 
   [[nodiscard]] bool solve() const noexcept;
 
  private:
-  std::unordered_map<std::string, Clause> clauses_;
+
+  [[nodiscard]] std::shared_ptr<CNF> copy() const noexcept;
+
+  void set_lit_value(uint32_t lit, bool value) noexcept;
+  void spread_one() noexcept;
+  uint32_t get_next_lit() noexcept;
+
+  LiteralClauses *table_;
 };
 
 #endif //YADPLL_INCLUDE_CNF_H_

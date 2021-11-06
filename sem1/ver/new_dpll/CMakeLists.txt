@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(yadpll)
 
 set(CMAKE_CXX_STANDARD 17)
-set(SOURCES include/clause.h src/clause.cpp include/cnf.h src/cnf.cpp src/dpll.cpp include/dpll.h include/literal_queue.h src/literal_queue.cpp)
+set(SOURCES include/literal.h src/literal.cpp include/cnf.h src/cnf.cpp)
 
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
