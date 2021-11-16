@@ -26,13 +26,6 @@ class CNF {
   [[nodiscard]] bool solve() const noexcept;
 
  private:
-
-  [[nodiscard]] std::shared_ptr<CNF> copy() const noexcept;
-
-  void set_lit_value(uint32_t lit, bool value) noexcept;
-  void spread_one() noexcept;
-  uint32_t get_next_lit() noexcept;
-
   LiteralClauses *table_;
 };
 

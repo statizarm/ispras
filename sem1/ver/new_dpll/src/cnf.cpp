@@ -6,6 +6,16 @@
 #include <cstring>
 #include "cnf.h"
 
+struct StackChunk {
+  uint32_t literal_name;
+  uint32_t save_point;
+  LiteralClauses::value_type literal_value;
+
+  StackChunk(uint32_t literal_name, uint32_t save_point, LiteralClauses::value_type literal_value)
+    : literal_name(literal_name), save_point(save_point), literal_value(literal_value) { }
+
+};
+
 void parse_clause_string(const std::string &str, LiteralClauses *table, uint32_t clause_id) noexcept;
 
 std::unique_ptr<CNF> CNF::load_cnf(std::istream &in) {
@@ -37,38 +47,61 @@ std::unique_ptr<CNF> CNF::load_cnf(std::istream &in) {
 }
 
 bool CNF::solve() const noexcept {
-  std::stack<std::shared_ptr<CNF>> stack;
+  auto table = this->table_;
+  std::stack<StackChunk> stack;
 
-  stack.push(this->copy());
+  // prepare
+  table->spread_one();
 
+  if (table->is_empty()) {
+    return true;
+  }
+
+  if (table->has_empty()) {
+    return false;
+  }
+
+  auto point = table->get_savepoint();
+  auto lit_ = table->get_literal();
+  stack.emplace(lit_, point, LiteralClauses::LITERAL_TRUE);
+  stack.emplace(lit_, point, LiteralClauses::LITERAL_FALSE);
+
+  // run
   while (!stack.empty()) {
-    auto cnf = stack.top();
+    auto chunk = stack.top();
+    stack.pop();
 
-    cnf->table_->spread_one();
+    if (table->set_value(chunk.literal_name, chunk.literal_value).has_empty()) {
+      if (!stack.empty()) {
+        table->rollback(stack.top().save_point);
+      }
 
-    if (cnf->table_->is_empty()) {
-      return true;
-    }
-
-    if (cnf->table_->has_empty()) {
-      stack.pop();
       continue;
     }
 
-    stack.push(cnf->copy());
+    table->spread_one();
 
-    auto lit = cnf->table_->get_literal();
+    if (table->is_empty()) {
+      return true;
+    }
 
-    stack.top()->table_->set_value(lit, LiteralClauses::LITERAL_FALSE);
-    cnf->table_->set_value(lit, LiteralClauses::LITERAL_TRUE);
+    if (table->has_empty()) {
+      if (!stack.empty()) {
+        table->rollback(stack.top().save_point);
+      }
+
+      continue;
+    }
+
+
+    chunk.literal_name = table->get_literal();
+    chunk.save_point = table->get_savepoint();
+
+    stack.emplace(chunk.literal_name, chunk.save_point, LiteralClauses::LITERAL_TRUE);
+    stack.emplace(chunk.literal_name, chunk.save_point, LiteralClauses::LITERAL_FALSE);
   }
 
   return false;
-}
-
-std::shared_ptr<CNF> CNF::copy() const noexcept {
-  auto new_table = this->table_->copy();
-  return std::make_shared<CNF>(new_table);
 }
 
 void parse_clause_string(const std::string &str, LiteralClauses *table, uint32_t clause_id) noexcept {

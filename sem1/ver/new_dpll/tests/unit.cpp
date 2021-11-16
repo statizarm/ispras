@@ -44,6 +44,34 @@ TEST(buildCNFTest, buildAndSolveWrongExpressionInLogFromatTest) {
   ASSERT_EQ(cnf->solve(), false);
 }
 
+TEST(buildCNFTest, buildAndSolveCorrectExpressionWithThreeClTest) {
+  std::string source = "c A sample .cnf file.\n"
+                       "p cnf 3 2\n"
+                       "-1 -2 0\n"
+                       "-1 2 0\n"
+                       "1 -2 0\n"
+                       "hmm\n";
+
+  std::istringstream in(source);
+
+  auto cnf = CNF::load_cnf(in);
+  ASSERT_EQ(cnf->solve(), true);
+}
+
+TEST(buildCNFTest, buildAndSolveCorrectExpressionWithThreeClLitTest) {
+  std::string source = "c A sample .cnf file.\n"
+                       "p cnf 3 5\n"
+                       "-1 -2 3 0\n"
+                       "-1 2 4 0\n"
+                       "3 -2 5 0\n"
+                       "hmm\n";
+
+  std::istringstream in(source);
+
+  auto cnf = CNF::load_cnf(in);
+  ASSERT_EQ(cnf->solve(), true);
+}
+
 TEST(buildCNFTest, buildAndSolveWrongExpressionWithThreeClTest) {
   std::string source = "c A sample .cnf file.\n"
                        "p cnf 3 3\n"
