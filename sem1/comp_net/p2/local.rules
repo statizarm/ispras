@@ -1,0 +1,51 @@
+# Shushuev Artemiy Igorevich msp21
+#
+
+# SG-1
+alert tcp any any -> any any (flow:not_established,from_client; dsize:0; flags:S; window:1; msg:"SG-1"; sid:1000001;)
+
+# SG-2
+alert tcp any any -> any any (flow:not_established,from_client; dsize:0; flags:S; window:63; msg:"SG-2"; sid:1000002;)
+
+# SG-3
+alert tcp any any -> any any (flow:not_established,from_client; dsize:0; flags:S; window:4; msg:"SG-3"; sid:1000003; session:all;)
+
+# SG-4
+alert tcp any any -> any any (flow:not_established,from_client; dsize:0; flags:S; window:4; msg:"SG-4"; sid:1000004;)
+
+# SG-5
+alert tcp any any -> any any (flow:not_established,from_client; dsize:0; flags:S; window:16; msg:"SG-5"; sid:1000005;)
+
+# SG-6
+alert tcp any any -> any any (flow:not_established,from_client; dsize:0; flags:S; window:512; msg:"SG-6"; sid:1000006;)
+
+# IE-1
+alert icmp any any -> any any (itype:8; dsize: 120; pcre:"/\x00{120}/"; fragbits:D; tos:0; icode:9; icmp_seq:295; msg:"IE-1"; sid:1000007;)
+
+# IE-2
+alert icmp any any -> any any (itype:8; dsize: 150; pcre:"/\x00{150}/"; tos:4; icode:0; icmp_seq:296; msg:"IE-2"; sid:1000008;)
+
+# ECN-1
+alert tcp any any -> any any (flags:SCE; window: 3; ack:0; msg:"ECN-1"; sid:1000009;)
+
+# T-2
+alert tcp any any -> any any (flow:not_established,from_client; flags:0; fragbits:D; window:128; msg:"T-2"; sid:1000010;)
+
+# T-3
+alert tcp any any -> any any (flow:not_established,from_client; flags:SFUP; fragbits:!D; window:256; msg:"T-3"; sid:1000011;)
+
+# T-4
+alert tcp any any -> any any (flow:not_established,from_client; flags:A; fragbits:D; window:1024; msg:"T-4"; sid:1000012;)
+
+# T-5
+alert tcp any any -> any any (flow:not_established,from_client; flags:S; fragbits:!D; window:31337; msg:"T-5"; sid:1000013;)
+
+# T-6
+alert tcp any any -> any any (flow:not_established,from_client; flags:A; fragbits:D; window:32768; msg:"T-6"; sid:1000014;)
+
+# T-7
+alert tcp any any -> any any (flow:not_established,from_client; flags:FPU; fragbits:!D; window:65535; msg:"T-7"; sid:1000015;)
+
+# U-1
+alert udp any any -> any any (dsize:300; pcre:"/\x43{300}/"; id:4162; msg:"U-1"; sid:1000016;)
+
