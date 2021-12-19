@@ -1,0 +1,12 @@
+digraph {
+  s1 [label="!n"];
+  s2 [label="x=x*a+c"];
+  s3 [label="*out=x"];
+  s4 [label="++out;"];
+  s5 [label="--n"];
+
+  s5 -> s1;
+  s2 -> s2;
+  s2 -> s3;
+  s4 -> s3;
+}
