@@ -78,22 +78,6 @@ TEST_F(StressTest, SolveUnsatFilesTest) {
   }
 }
 
-TEST_F(StressTest, stressWith1000LiteralsIn1000CluasesTest) {
-  std::vector<Literal> literals;
-  for (int i = 1; i <= 5000; ++i) {
-    literals.emplace_back(i, false);
-  }
-
-  std::vector<Clause> clauses;
-  for (int i = 1; i <= 5000; ++i) {
-    clauses.emplace_back(literals.begin(), literals.end());
-  }
-
-  CNF cnf(clauses.begin(), clauses.end());
-
-  ASSERT_EQ(cnf.solve(), true);
-}
-
 TEST_F(StressTest, hanoi4StressTest) {
   std::ifstream in(hanoi4_file_);
 
