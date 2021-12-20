@@ -22,6 +22,7 @@ static void calculate_closure(
 
   std::queue<const Formula *> queue;
   std::unordered_map<const Formula *, const Formula *> not_operators;
+  std::unordered_set<const Formula *> unadded;
 
   queue.push(formula);
   while(!queue.empty()) {
@@ -47,11 +48,16 @@ static void calculate_closure(
       default:
         break;
     }
-
     if (closure.find(formula) == closure.end()) {
-      auto neg = std::addressof(!*formula);
-      closure.insert({formula, neg});
-      closure.insert({neg, formula});
+      unadded.insert(formula);
+    }
+  }
+
+  for (auto f : unadded) {
+    if (closure.find(f) == closure.end()) {
+      auto neg = std::addressof(!*f);
+      closure.insert({f, neg});
+      closure.insert({neg, f});
     }
   }
 
