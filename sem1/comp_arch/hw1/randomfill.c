@@ -42,9 +42,8 @@ struct test_case test_suite[] = {
     },
     {
         .foo = randomfill_m5,
-        .name = "fourth modified"
+        .name = "fith modified"
     }
-
 };
 
 uint64_t dst[999999];
