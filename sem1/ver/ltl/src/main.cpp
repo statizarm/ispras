@@ -6,7 +6,7 @@ using namespace model::ltl;
 using namespace model::fsm;
 
 int main() {
-  Formula formula = G(P("p") >> X(P("q")));
+  Formula formula = U(F(P("p")), !P("p") && X(G(P("q"))));
 
   std::cout << "Formula:\n" << formula << std::endl;
 
